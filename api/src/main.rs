@@ -7,7 +7,7 @@ use chrono::prelude::*;
 
 use actix_cors::Cors;
 use actix_web::{
-    get, middleware::Logger, web, App, HttpRequest, HttpResponse, HttpServer, Responder,
+    get, http, middleware::Logger, web, App, HttpRequest, HttpResponse, HttpServer, Responder,
 };
 use env_logger::Env;
 use serde::{Deserialize, Serialize};
@@ -65,6 +65,13 @@ struct NationalItem {
 struct Period {
     begin: Option<NaiveDateTime>,
     end: Option<NaiveDateTime>,
+}
+
+#[get("/")]
+async fn root() -> impl Responder {
+    HttpResponse::TemporaryRedirect()
+        .header(http::header::LOCATION, "https://editor.swagger.io/?url=https://raw.githubusercontent.com/bfabio/COVID-19/api/api/openapi.yaml")
+        .finish()
 }
 
 #[get("/andamento-nazionale")]
@@ -250,6 +257,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(Logger::default())
             .wrap(Cors::new().finish())
+            .service(root)
             .service(national)
             .service(
                 web::scope("/province")
