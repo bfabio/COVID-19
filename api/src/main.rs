@@ -22,31 +22,8 @@ lazy_static! {
     static ref PROVINCES: Vec<ProvincesItem> = serde_json::from_str(&PROVINCES_RAW).unwrap();
 }
 
-mod rfc3339_time {
-    use chrono::NaiveDateTime;
-    use serde::{self, Deserialize, Deserializer, Serializer};
-
-    const FORMAT: &'static str = "%Y-%m-%d %H:%M:%S";
-
-    pub fn serialize<S: Serializer>(
-        date: &NaiveDateTime,
-        serializer: S,
-    ) -> Result<S::Ok, S::Error> {
-        let s = format!("{}", date.format(FORMAT));
-        serializer.serialize_str(&s)
-    }
-
-    pub fn deserialize<'de, D: Deserializer<'de>>(
-        deserializer: D,
-    ) -> Result<NaiveDateTime, D::Error> {
-        let s = String::deserialize(deserializer)?;
-        NaiveDateTime::parse_from_str(&s, FORMAT).map_err(serde::de::Error::custom)
-    }
-}
-
 #[derive(Clone, Serialize, Deserialize)]
 struct NationalItem {
-    #[serde(with = "rfc3339_time")]
     data: NaiveDateTime,
     stato: String,
     ricoverati_con_sintomi: u32,
@@ -59,6 +36,7 @@ struct NationalItem {
     deceduti: u32,
     totale_casi: u32,
     tamponi: u32,
+    note: String,
 }
 
 #[derive(Deserialize)]
@@ -106,7 +84,6 @@ async fn national(period: web::Query<Period>) -> impl Responder {
 
 #[derive(Clone, Serialize, Deserialize)]
 struct ProvincesItem {
-    #[serde(with = "rfc3339_time")]
     data: NaiveDateTime,
     stato: String,
     codice_regione: u16,
@@ -117,6 +94,7 @@ struct ProvincesItem {
     lat: f64,
     long: f64,
     totale_casi: u32,
+    note: String,
 }
 async fn provinces(req: HttpRequest, period: web::Query<Period>) -> impl Responder {
     let province = req.match_info().query("province");
@@ -182,7 +160,6 @@ async fn provinces(req: HttpRequest, period: web::Query<Period>) -> impl Respond
 
 #[derive(Clone, Serialize, Deserialize)]
 struct RegionsItem {
-    #[serde(with = "rfc3339_time")]
     data: NaiveDateTime,
     stato: String,
     codice_regione: u16,
@@ -199,6 +176,7 @@ struct RegionsItem {
     deceduti: u32,
     totale_casi: u32,
     tamponi: u32,
+    note: String,
 }
 
 async fn regions(req: HttpRequest, period: web::Query<Period>) -> impl Responder {
