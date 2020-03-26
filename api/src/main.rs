@@ -36,7 +36,8 @@ struct NationalItem {
     deceduti: u32,
     totale_casi: u32,
     tamponi: u32,
-    note: String,
+    note_it: String,
+    note_en: String,
 }
 
 #[derive(Deserialize)]
@@ -94,7 +95,8 @@ struct ProvincesItem {
     lat: f64,
     long: f64,
     totale_casi: u32,
-    note: String,
+    note_it: String,
+    note_en: String,
 }
 async fn provinces(req: HttpRequest, period: web::Query<Period>) -> impl Responder {
     let province = req.match_info().query("province");
@@ -176,7 +178,8 @@ struct RegionsItem {
     deceduti: u32,
     totale_casi: u32,
     tamponi: u32,
-    note: String,
+    note_it: String,
+    note_en: String,
 }
 
 async fn regions(req: HttpRequest, period: web::Query<Period>) -> impl Responder {
