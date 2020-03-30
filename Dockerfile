@@ -5,7 +5,9 @@ from rust:1.41-slim as build
 
 WORKDIR /app
 
-RUN rustup target add x86_64-unknown-linux-musl
+ARG target=x86_64-unknown-linux-musl
+
+RUN rustup target add $target
 
 RUN apt-get update && apt-get install -y musl-tools \
   && apt-get clean \
@@ -13,15 +15,15 @@ RUN apt-get update && apt-get install -y musl-tools \
 
 COPY api/Cargo.lock api/Cargo.toml ./api/
 
-RUN mkdir ./api/.cargo
-RUN cd api && cargo vendor > .cargo/config
+RUN mkdir -p api/src && echo 'fn main(){}' > api/src/main.rs
 
-RUN rustup show active-toolchain
+RUN cd api && cargo build --release --target $target
 
 COPY ./ ./
+RUN touch api/src/main.rs
 
-RUN cd api && cargo build --release --target x86_64-unknown-linux-musl
-RUN strip /app/api/target/x86_64-unknown-linux-musl/release/api
+RUN cd api && cargo build --release --target $target
+RUN strip /app/api/target/$target/release/api
 
 #
 # Final image
